@@ -34,7 +34,8 @@ sftp:
     type: LoadBalancer
     port: 2022  # SFTPGo default SFTP port
     adminPort: 8080  # SFTPGo admin API port (optional)
-    loadBalancerIP: "192.168.8.25"
+    loadBalancerIP: "192.168.8.24"
+    ipPool: "shared-pool"
   
   resources:
     requests:
@@ -60,6 +61,7 @@ nginx:
     type: LoadBalancer
     port: 80
     loadBalancerIP: "192.168.8.25"
+    ipPool: "shared-pool"
   
   resources:
     requests:

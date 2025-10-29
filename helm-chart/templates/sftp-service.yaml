@@ -6,15 +6,15 @@ metadata:
   labels:
     {{- include "munki-fileserver.labels" . | nindent 4 }}
     component: sftp
-  {{- if .Values.sftp.service.loadBalancerIP }}
   annotations:
+    {{- if .Values.sftp.service.ipPool }}
+    metallb.universe.tf/ip-allocated-from-pool: {{ .Values.sftp.service.ipPool | quote }}
+    {{- end }}
+    {{- if .Values.sftp.service.loadBalancerIP }}
     metallb.universe.tf/loadBalancerIPs: {{ .Values.sftp.service.loadBalancerIP | quote }}
-  {{- end }}
+    {{- end }}
 spec:
   type: {{ .Values.sftp.service.type }}
-  {{- if .Values.sftp.service.loadBalancerIP }}
-  loadBalancerIP: {{ .Values.sftp.service.loadBalancerIP | quote }}
-  {{- end }}
   ports:
     - port: {{ .Values.sftp.service.port }}
       targetPort: sftp
