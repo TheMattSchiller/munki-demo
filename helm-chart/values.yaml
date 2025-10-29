@@ -13,26 +13,27 @@ storage:
 sftp:
   enabled: true
   image:
-    # atmoz/sftp latest tag should support multi-arch including ARM64
-    # The Docker image will automatically pull the correct architecture
-    repository: atmoz/sftp
+    # Using SFTPGo which supports ARM64 architecture
+    repository: drakkan/sftpgo
     tag: latest
     pullPolicy: IfNotPresent
   
-  # Node selector to ensure pod runs on ARM64 nodes
-  # Adjust the label key/value based on your cluster's node labels
-  nodeSelector:
-    kubernetes.io/arch: arm64
-  
+  # SFTPGo configuration
+  # Note: SFTPGo requires users to be created via the admin API/web interface
+  # After deployment, access http://<loadBalancerIP>:8080/web/admin to create users
+  # Or use the API: POST to /api/v2/users with username/password/home_dir
+  # The values below are for reference/documentation - they will need to be created via SFTPGo API
   users:
     - name: munki
       password: munkipassword
-      uid: 1000
-      gid: 1000
+      homeDir: /munki
+      permissions:
+        - "*"
   
   service:
     type: LoadBalancer
-    port: 22
+    port: 2022  # SFTPGo default SFTP port
+    adminPort: 8080  # SFTPGo admin API port (optional)
     loadBalancerIP: "192.168.8.25"
   
   resources:

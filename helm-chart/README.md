@@ -32,10 +32,11 @@ The chart creates a PersistentVolumeClaim with:
 
 ### SFTP Server
 
-The SFTP server uses the `atmoz/sftp` image and is configured with:
-- Default user: `munki` (username and password can be changed in values.yaml)
-- Port: 22 (configurable)
-- Service Type: ClusterIP (configurable)
+The SFTP server uses the `drakkan/sftpgo` image (ARM64 compatible) and is configured with:
+- Port: 2022 (SFTPGo default SFTP port)
+- Admin Web UI: Port 8080 (for user management)
+- Service Type: LoadBalancer (configurable)
+- **Note**: Users must be created via the SFTPGo admin interface at `http://<loadBalancerIP>:8080/web/admin` after deployment
 
 ### NGINX Server
 
@@ -51,17 +52,22 @@ The NGINX server uses the official `nginx:alpine` image and:
 
 Once deployed, you can access the SFTP server using:
 ```bash
-# From within the cluster
-sftp munki@<service-name>-sftp:<port>
+# Using the LoadBalancer IP (default: 192.168.8.25)
+sftp -P 2022 munki@192.168.8.25
 
-# Or port-forward to access from outside
-kubectl port-forward svc/<release-name>-munki-fileserver-sftp 2222:22
-sftp -P 2222 munki@localhost
+# Or via port-forward
+kubectl port-forward svc/<release-name>-munki-fileserver-sftp 2022:2022
+sftp -P 2022 munki@localhost
 ```
 
-Default credentials (change these!):
-- Username: `munki`
-- Password: `changeme123`
+**Important**: Before connecting, you must create the SFTP user via the SFTPGo admin interface:
+1. Access the admin UI: `http://192.168.8.25:8080/web/admin`
+2. Log in with the default admin credentials (first run will prompt for initial admin setup)
+3. Create a new user:
+   - Username: `munki`
+   - Password: (set your desired password)
+   - Home Directory: `/munki`
+   - Permissions: All (`*`)
 
 ### Accessing NGINX
 

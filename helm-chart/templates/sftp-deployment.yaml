@@ -31,19 +31,48 @@ spec:
         imagePullPolicy: {{ .Values.sftp.image.pullPolicy }}
         ports:
         - name: sftp
-          containerPort: 22
+          containerPort: 2022
+          protocol: TCP
+        - name: admin
+          containerPort: 8080
           protocol: TCP
         volumeMounts:
         - name: munki-storage
           mountPath: {{ .Values.volume.mountPath }}
+        - name: sftpgo-config
+          mountPath: /etc/sftpgo
+        - name: sftpgo-data
+          mountPath: /var/lib/sftpgo
         env:
-        - name: USERS
-          value: {{- range $index, $user := .Values.sftp.users }}{{ if $index }} {{ end }}{{ printf "%s:%s:%d:%d" $user.name $user.password $user.uid $user.gid }}{{- end -}}
+        - name: SFTPGO_DATA_PROVIDER__DRIVER
+          value: "sqlite"
+        - name: SFTPGO_DATA_PROVIDER__NAME
+          value: "/var/lib/sftpgo/sftpgo.db"
+        - name: SFTPGO_SFTPD__BINDINGS__0__ADDRESS
+          value: "0.0.0.0"
+        - name: SFTPGO_SFTPD__BINDINGS__0__PORT
+          value: "2022"
+        - name: SFTPGO_HTTPD__BINDINGS__0__ADDRESS
+          value: "0.0.0.0"
+        - name: SFTPGO_HTTPD__BINDINGS__0__PORT
+          value: "8080"
+        - name: SFTPGO_HTTPD__TEMPLATES__PATH
+          value: "/srv/sftpgo/templates"
+        - name: SFTPGO_DEFAULTS__SHARES
+          value: "{{ .Values.volume.mountPath }}"
+        securityContext:
+          runAsUser: 1000
+          runAsGroup: 1000
+          fsGroup: 1000
         resources:
           {{- toYaml .Values.sftp.resources | nindent 10 }}
       volumes:
       - name: munki-storage
         persistentVolumeClaim:
           claimName: {{ include "munki-fileserver.fullname" . }}-storage
+      - name: sftpgo-config
+        emptyDir: {}
+      - name: sftpgo-data
+        emptyDir: {}
 {{- end }}
 

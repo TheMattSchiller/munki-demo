@@ -20,6 +20,12 @@ spec:
       targetPort: sftp
       protocol: TCP
       name: sftp
+    {{- if .Values.sftp.service.adminPort }}
+    - port: {{ .Values.sftp.service.adminPort }}
+      targetPort: admin
+      protocol: TCP
+      name: admin
+    {{- end }}
   selector:
     {{- include "munki-fileserver.sftp.selectorLabels" . | nindent 4 }}
 {{- end }}
