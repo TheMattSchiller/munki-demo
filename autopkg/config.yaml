@@ -1,0 +1,15 @@
+repo_path: ../munki/repo
+repo_url: http://192.168.8.25/
+sftp_user: munki
+sftp_password: munkipassword
+sftp_host: 192.168.8.24
+sftp_port: 2022
+
+repos:
+  - name: recipes
+    url: https://github.com/autopkg/recipes.git
+
+recipes:
+  - VLC.munki
+  - GoogleChrome.munki
+  - Firefox.munki
