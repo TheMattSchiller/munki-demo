@@ -1,0 +1,7 @@
+apiVersion: v2
+name: munki-fileserver
+description: A Helm chart for deploying SFTP and NGINX file servers for Munki with shared persistent storage
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+

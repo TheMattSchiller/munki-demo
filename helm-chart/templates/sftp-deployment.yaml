@@ -1,0 +1,41 @@
+{{- if .Values.sftp.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "munki-fileserver.fullname" . }}-sftp
+  labels:
+    {{- include "munki-fileserver.labels" . | nindent 4 }}
+    component: sftp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "munki-fileserver.sftp.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "munki-fileserver.sftp.selectorLabels" . | nindent 8 }}
+        component: sftp
+    spec:
+      containers:
+      - name: sftp
+        image: {{ .Values.sftp.image.repository }}:{{ .Values.sftp.image.tag }}
+        imagePullPolicy: {{ .Values.sftp.image.pullPolicy }}
+        ports:
+        - name: sftp
+          containerPort: 22
+          protocol: TCP
+        volumeMounts:
+        - name: munki-storage
+          mountPath: {{ .Values.volume.mountPath }}
+        env:
+        - name: USERS
+          value: {{- range $index, $user := .Values.sftp.users }}{{ if $index }} {{ end }}{{ printf "%s:%s:%d:%d" $user.name $user.password $user.uid $user.gid }}{{- end -}}
+        resources:
+          {{- toYaml .Values.sftp.resources | nindent 10 }}
+      volumes:
+      - name: munki-storage
+        persistentVolumeClaim:
+          claimName: {{ include "munki-fileserver.fullname" . }}-storage
+{{- end }}
+

@@ -1,0 +1,59 @@
+# Default values for munki-fileserver
+# This is a YAML-formatted file.
+
+# Storage configuration
+storage:
+  size: 20Gi
+  storageClass: local-path  # Using local-path provisioner
+  accessMode: ReadWriteMany
+
+# SFTP Server configuration
+sftp:
+  enabled: true
+  image:
+    repository: atmoz/sftp
+    tag: alpine
+    pullPolicy: IfNotPresent
+  
+  users:
+    - name: munki
+      password: munkipassword
+      uid: 1000
+      gid: 1000
+  
+  service:
+    type: ClusterIP
+    port: 22
+  
+  resources:
+    requests:
+      memory: "64Mi"
+      cpu: "50m"
+    limits:
+      memory: "128Mi"
+      cpu: "100m"
+
+# NGINX Server configuration
+nginx:
+  enabled: true
+  image:
+    repository: nginx
+    tag: alpine
+    pullPolicy: IfNotPresent
+  
+  service:
+    type: ClusterIP
+    port: 80
+  
+  resources:
+    requests:
+      memory: "64Mi"
+      cpu: "50m"
+    limits:
+      memory: "128Mi"
+      cpu: "100m"
+
+# Shared volume mount path
+volume:
+  mountPath: /munki
+
