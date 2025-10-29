@@ -13,9 +13,16 @@ storage:
 sftp:
   enabled: true
   image:
+    # atmoz/sftp latest tag should support multi-arch including ARM64
+    # The Docker image will automatically pull the correct architecture
     repository: atmoz/sftp
-    tag: alpine
+    tag: latest
     pullPolicy: IfNotPresent
+  
+  # Node selector to ensure pod runs on ARM64 nodes
+  # Adjust the label key/value based on your cluster's node labels
+  nodeSelector:
+    kubernetes.io/arch: arm64
   
   users:
     - name: munki
@@ -43,6 +50,10 @@ nginx:
     repository: nginx
     tag: alpine
     pullPolicy: IfNotPresent
+  
+  # Node selector to ensure pod runs on ARM64 nodes (same as SFTP for volume sharing)
+  nodeSelector:
+    kubernetes.io/arch: arm64
   
   service:
     type: LoadBalancer

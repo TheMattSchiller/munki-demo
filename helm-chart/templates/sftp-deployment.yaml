@@ -17,6 +17,14 @@ spec:
         {{- include "munki-fileserver.sftp.selectorLabels" . | nindent 8 }}
         component: sftp
     spec:
+      {{- if .Values.sftp.nodeSelector }}
+      nodeSelector:
+        {{- toYaml .Values.sftp.nodeSelector | nindent 8 }}
+      {{- end }}
+      {{- if .Values.sftp.tolerations }}
+      tolerations:
+        {{- toYaml .Values.sftp.tolerations | nindent 8 }}
+      {{- end }}
       containers:
       - name: sftp
         image: {{ .Values.sftp.image.repository }}:{{ .Values.sftp.image.tag }}
