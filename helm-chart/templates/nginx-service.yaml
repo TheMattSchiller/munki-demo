@@ -6,8 +6,15 @@ metadata:
   labels:
     {{- include "munki-fileserver.labels" . | nindent 4 }}
     component: nginx
+  {{- if .Values.nginx.service.loadBalancerIP }}
+  annotations:
+    metallb.universe.tf/loadBalancerIPs: {{ .Values.nginx.service.loadBalancerIP | quote }}
+  {{- end }}
 spec:
   type: {{ .Values.nginx.service.type }}
+  {{- if .Values.nginx.service.loadBalancerIP }}
+  loadBalancerIP: {{ .Values.nginx.service.loadBalancerIP | quote }}
+  {{- end }}
   ports:
     - port: {{ .Values.nginx.service.port }}
       targetPort: http
