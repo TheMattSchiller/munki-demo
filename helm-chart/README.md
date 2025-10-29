@@ -28,7 +28,7 @@ helm upgrade munki-fileserver ./helm-chart
 The chart creates a PersistentVolumeClaim with:
 - Size: 20Gi (configurable via `storage.size`)
 - Storage Class: `local-path` (configurable via `storage.storageClass`)
-- Access Mode: `ReadWriteMany` (allows multiple pods to mount the same volume)
+- Access Mode: `ReadWriteOnce` (local-path limitation - both pods use pod affinity to schedule on the same node)
 
 ### SFTP Server
 
@@ -104,13 +104,38 @@ You can:
 2. Use Kubernetes Secrets (modify templates to add secret support)
 3. Set up proper authentication and authorization
 
+## Troubleshooting
+
+### VolumeBinding Errors
+
+If you encounter errors like "Operation cannot be fulfilled on persistentvolumeclaims", try:
+
+1. Delete any existing PVC in a pending or error state:
+```bash
+kubectl delete pvc <release-name>-munki-fileserver-storage
+```
+
+2. Reinstall the chart:
+```bash
+helm uninstall munki-fileserver
+helm install munki-fileserver ./helm-chart
+```
+
+3. Verify the PVC is bound:
+```bash
+kubectl get pvc
+kubectl describe pvc <release-name>-munki-fileserver-storage
+```
+
+**Note**: The `local-path` storage class uses `WaitForFirstConsumer` binding mode, meaning the PVC won't bind until a pod that uses it is scheduled. The first pod will bind the volume to its node, and the second pod will be scheduled on the same node via pod affinity.
+
 ## Uninstallation
 
 ```bash
 helm uninstall munki-fileserver
 ```
 
-**Note**: Uninstalling will delete the deployments and services, but the PersistentVolumeClaim will remain to preserve data. Delete it manually if you want to remove the storage:
+**Note**: Uninstalling will delete the deployments and services, but the PersistentVolumeClaim will remain to preserve data (due to `helm.sh/resource-policy: keep` annotation). Delete it manually if you want to remove the storage:
 
 ```bash
 kubectl delete pvc <release-name>-munki-fileserver-storage

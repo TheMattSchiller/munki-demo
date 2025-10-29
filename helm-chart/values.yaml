@@ -5,7 +5,9 @@
 storage:
   size: 20Gi
   storageClass: local-path  # Using local-path provisioner
-  accessMode: ReadWriteMany
+  # Note: local-path typically supports ReadWriteOnce only
+  # Both pods will need to be scheduled on the same node to share the volume
+  accessMode: ReadWriteOnce
 
 # SFTP Server configuration
 sftp:

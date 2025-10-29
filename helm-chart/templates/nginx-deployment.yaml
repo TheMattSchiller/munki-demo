@@ -17,6 +17,18 @@ spec:
         {{- include "munki-fileserver.nginx.selectorLabels" . | nindent 8 }}
         component: nginx
     spec:
+      affinity:
+        podAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: component
+                  operator: In
+                  values:
+                  - sftp
+              topologyKey: kubernetes.io/hostname
       containers:
       - name: nginx
         image: {{ .Values.nginx.image.repository }}:{{ .Values.nginx.image.tag }}
